@@ -19,9 +19,9 @@
     var READING_LINKED = 6;        // linked verses shown under each of them
 
     var EXPLANATIONS = {
-        fan: 'Cada linha sai do versículo em que você clicou e vai até outra ocorrência do mesmo lema.',
-        pairs: 'Cada linha liga uma ocorrência do lema no livro da esquerda a uma ocorrência no eixo da direita.',
-        lxx: 'Cada linha liga uma ocorrência do lema a um versículo do outro testamento onde a palavra tem o mesmo '
+        fan: 'Cada linha sai do versículo em que você clicou e vai até outra ocorrência do mesmo verbete.',
+        pairs: 'Cada linha liga uma ocorrência do verbete no livro da esquerda a uma ocorrência no eixo da direita.',
+        lxx: 'Cada linha liga uma ocorrência do verbete a um versículo do outro testamento onde a palavra tem o mesmo '
             + 'número Strong grego: no Antigo Testamento, o da palavra que a Septuaginta usou para traduzir o '
             + 'hebraico ou aramaico (equivalência registrada pelo MACULA Hebrew); no Novo, o da própria palavra grega.'
     };

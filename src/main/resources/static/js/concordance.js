@@ -56,14 +56,17 @@
         title.lang = language;
         document.title = (result.lemma || result.form) + ' - Concordância';
         document.getElementById('concordance-dek').textContent = result.lemma
-            ? 'Todas as ocorrências do lema, incluindo suas flexões.'
+            ? 'Todas as ocorrências do verbete, incluindo suas flexões.'
             : 'Ocorrências da forma escrita exata, sem distinguir maiúsculas e minúsculas.';
 
         var scope = document.getElementById('scope-list');
         dlRow(scope, 'Edição', result.edition.name + ' (' + result.edition.version + ')');
         dlRow(scope, 'Idioma', result.edition.languageName);
         if (result.lemma) {
-            dlRow(scope, 'Lema', result.lemma, language);
+            scope.appendChild(Biblia.element('dt', null, 'Verbete'));
+            var verbete = Biblia.element('dd');
+            verbete.appendChild(Biblia.verbete(result.lemma, language, result.lemmaGlosses));
+            scope.appendChild(verbete);
         } else {
             dlRow(scope, 'Forma', result.form, language);
         }
@@ -75,7 +78,7 @@
             return Biblia.filterNames[name] + ': ' + Biblia.label(name, result.filters[name]);
         });
         dlRow(scope, 'Filtros morfológicos', filters.length ? filters.join('; ') : 'nenhum');
-        dlRow(scope, 'Análise', 'Lemas e morfologia conforme a fonte da edição');
+        dlRow(scope, 'Análise', 'Verbetes e morfologia conforme a fonte da edição');
 
         var totals = document.getElementById('totals');
         dlRow(totals, 'Ocorrências', result.counts.occurrences.toLocaleString('pt-BR'));
@@ -210,7 +213,7 @@
     }
 
     if (!criteria.lexeme && !criteria.form) {
-        Biblia.showError('Informe um lema ou uma forma. Comece selecionando uma palavra na leitura.');
+        Biblia.showError('Informe um verbete ou uma forma. Comece selecionando uma palavra na leitura.');
         return;
     }
 

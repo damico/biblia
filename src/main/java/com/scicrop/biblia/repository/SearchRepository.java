@@ -123,7 +123,7 @@ public class SearchRepository {
                         rs.getLong("together"), rs.getLong("word_verses"), rs.getLong("lemma_verses"),
                         rs.getDouble("dice"), List.of()))
                 .list();
-        Map<Integer, List<String>> glosses = topGlosses(originalId,
+        Map<Integer, List<String>> glosses = findTopGlosses(originalId,
                 rows.stream().map(LemmaAssociation::lexemeId).toList(), 6);
         return rows.stream()
                 .map(a -> new LemmaAssociation(a.lexemeId(), a.lemma(), a.languageCode(), a.together(),
@@ -141,7 +141,8 @@ public class SearchRepository {
                 .list();
     }
 
-    private Map<Integer, List<String>> topGlosses(int editionId, List<Integer> lexemeIds, int perLexeme) {
+    /** The most common English glosses of each lexeme in the edition, most frequent first. */
+    public Map<Integer, List<String>> findTopGlosses(int editionId, List<Integer> lexemeIds, int perLexeme) {
         Map<Integer, List<String>> glosses = new HashMap<>();
         if (lexemeIds.isEmpty()) {
             return glosses;

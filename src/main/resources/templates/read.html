@@ -5,7 +5,10 @@
 <th:block th:replace="~{fragments/layout :: header}"></th:block>
 
 <main id="content" class="article" tabindex="-1">
-    <p class="article__category" id="edition-name"></p>
+    <div class="article__meta">
+        <p class="article__category" id="edition-name"></p>
+        <button type="button" id="share-start" class="secondary-button" hidden>Compartilhar</button>
+    </div>
     <h1 class="article__title" id="chapter-title">Carregando...</h1>
 
     <nav class="chapter-nav" aria-label="Capítulos">
@@ -24,7 +27,7 @@
     <p id="original-hint" class="article__caption" hidden></p>
 
     <p id="word-hint" class="article__caption" hidden>
-        Selecione uma palavra do texto original para ver lema, morfologia e ocorrências.
+        Selecione uma palavra do texto original para ver verbete, morfologia e ocorrências.
     </p>
 
     <p id="load-error" class="error-message" role="alert" hidden></p>
@@ -48,6 +51,28 @@
     </div>
     <div id="word-panel-body" aria-live="polite"></div>
 </aside>
+
+<div id="share-bar" class="share-bar" role="region" aria-label="Compartilhar versículos" hidden>
+    <p id="share-status" class="share-bar__status" aria-live="polite"></p>
+    <div class="share-bar__actions">
+        <button type="button" id="share-create" class="action-button" disabled>Gerar imagem</button>
+        <button type="button" id="share-cancel" class="link-button">Cancelar</button>
+    </div>
+</div>
+
+<dialog id="share-dialog" class="share-dialog" aria-labelledby="share-dialog-title">
+    <div class="share-dialog__header">
+        <h2 id="share-dialog-title" class="share-dialog__title">Imagem para compartilhar</h2>
+        <button type="button" id="share-close" class="link-button">Fechar</button>
+    </div>
+    <img id="share-preview" class="share-dialog__preview" alt="">
+    <div class="share-dialog__actions">
+        <button type="button" id="share-copy" class="action-button">Copiar imagem</button>
+        <button type="button" id="share-send" class="secondary-button" hidden>Enviar para outro aplicativo</button>
+        <a id="share-download" class="link-button" download>Baixar imagem</a>
+    </div>
+    <p id="share-message" class="share-dialog__message" aria-live="polite"></p>
+</dialog>
 
 <th:block th:replace="~{fragments/layout :: footer}"></th:block>
 <script th:src="@{/js/read.js}"></script>

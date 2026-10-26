@@ -113,8 +113,7 @@ a:hover {
     border-bottom: 1px solid var(--rule);
 }
 
-.site-header__inner,
-.site-footer__inner {
+.site-header__inner {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -197,9 +196,59 @@ a:hover {
     font-size: 0.875rem;
 }
 
-.credits {
-    max-width: var(--reading-measure);
+/* Footer list of every source the project uses: data, methods, typography and software. */
+.sources {
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: 0.75rem var(--gutter) 1.5rem;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.sources__title {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.sources__project {
+    margin: 0 0 0.25rem;
+}
+
+.sources__grid {
+    display: grid;
+    gap: 0 2rem;
+}
+
+@media (min-width: 60rem) {
+    .sources__project {
+    margin: 0 0 0.25rem;
+}
+
+.sources__grid {
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+}
+
+.sources__group {
+    margin: 0.75rem 0 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.sources__list {
     margin: 0;
+    padding-left: 1rem;
+}
+
+.sources__list li {
+    margin-bottom: 0.4rem;
+}
+
+.sources__attribution {
+    display: block;
 }
 
 /* Article column */
@@ -212,6 +261,20 @@ a:hover {
 
 .article:focus {
     outline: none;
+}
+
+/* Edition name with the share button on its right. */
+.article__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.article__meta .article__category {
+    margin: 0;
 }
 
 .article__category {
@@ -1245,4 +1308,149 @@ button.verse-link.is-selected {
 .links-reading-group__linked li:hover,
 .links-reading-group__anchor:hover {
     background: var(--surface);
+}
+
+/* Sharing verses: the reader picks verses, the bar at the bottom shows the selection. */
+
+body.is-sharing {
+    padding-bottom: 8rem;
+}
+
+body.is-sharing .verse {
+    cursor: pointer;
+    margin-inline: -0.5rem;
+    padding: 0.15rem 0.5rem;
+    border-left: 4px solid transparent;
+    border-radius: 2px;
+}
+
+body.is-sharing .verse:hover {
+    background: var(--surface);
+    border-left-color: var(--rule);
+}
+
+body.is-sharing .verse.is-shared {
+    background: var(--surface);
+    border-left-color: var(--link);
+    box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+body.is-sharing .verse .pt-word,
+body.is-sharing .verse .word,
+body.is-sharing .verse .verse-link {
+    pointer-events: none;
+    text-decoration: none;
+}
+
+.share-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    padding: 0.75rem var(--gutter);
+    background: var(--surface);
+    border-top: 1px solid var(--rule);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
+    z-index: 25;
+}
+
+.share-bar[hidden] {
+    display: none;
+}
+
+.share-bar__status {
+    margin: 0;
+    font-weight: 600;
+}
+
+.share-bar__actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.share-dialog {
+    width: min(36rem, calc(100vw - 2rem));
+    max-height: calc(100vh - 2rem);
+    padding: 1rem 1.25rem 1.25rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+}
+
+.share-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.share-dialog__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.share-dialog__title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.share-dialog__preview {
+    display: block;
+    width: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+    border: 1px solid var(--rule);
+}
+
+.share-dialog__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    margin-top: 1rem;
+}
+
+.share-dialog__message {
+    margin: 0.75rem 0 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.share-dialog__message:empty {
+    display: none;
+}
+
+.secondary-button {
+    font: inherit;
+    font-weight: 600;
+    min-height: 2.5rem;
+    padding: 0.4rem 1rem;
+    color: var(--link);
+    background: transparent;
+    border: 2px solid var(--link);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+@media print {
+    .share-bar,
+    #share-start {
+        display: none !important;
+    }
+}
+
+/* Verbete (lemma) with its English glosses beside it. */
+.verbete__english {
+    margin-left: 0.75em;
+    font-family: var(--font-ui);
+    font-size: 0.9em;
+    color: var(--muted);
 }

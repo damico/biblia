@@ -1,6 +1,7 @@
 package com.scicrop.biblia.cli;
 
 import com.scicrop.biblia.service.AlignmentImportService;
+import com.scicrop.biblia.service.AlmeidaImportService;
 import com.scicrop.biblia.service.BlivreImportService;
 import com.scicrop.biblia.service.MaculaImportService;
 import com.scicrop.biblia.service.VersificationImportService;
@@ -18,6 +19,7 @@ import java.util.List;
  * --import.macula.file=FILE (MACULA Greek or Hebrew TSV; --import.replace=true reloads a filled edition), or
  * --import.alignment.tokens=FILE with --import.alignment.file=FILE and --import.alignment.original=CODE
  * (Clear Bible Alignments translation tokens and word alignment), or
+ * --import.gutenberg.file=FILE (Old Testament of the Almeida 1911, Project Gutenberg eBook #62383), or
  * --import.versification.file=FILE with --import.versification.corrections=FILE and
  * --import.versification.version=COMMIT (TVTMS standard references for every edition; no --import.edition).
  * Run with --spring.main.web-application-type=none (see scripts/import-*.sh).
@@ -28,14 +30,16 @@ public class ImportCommand implements ApplicationRunner {
     private final BlivreImportService blivreImportService;
     private final MaculaImportService maculaImportService;
     private final AlignmentImportService alignmentImportService;
+    private final AlmeidaImportService almeidaImportService;
     private final VersificationImportService versificationImportService;
 
     public ImportCommand(BlivreImportService blivreImportService, MaculaImportService maculaImportService,
-                         AlignmentImportService alignmentImportService,
+                         AlignmentImportService alignmentImportService, AlmeidaImportService almeidaImportService,
                          VersificationImportService versificationImportService) {
         this.blivreImportService = blivreImportService;
         this.maculaImportService = maculaImportService;
         this.alignmentImportService = alignmentImportService;
+        this.almeidaImportService = almeidaImportService;
         this.versificationImportService = versificationImportService;
     }
 
@@ -44,6 +48,7 @@ public class ImportCommand implements ApplicationRunner {
         String blivreDir = option(args, "import.blivre.dir");
         String maculaFile = option(args, "import.macula.file");
         String alignmentTokens = option(args, "import.alignment.tokens");
+        String gutenbergFile = option(args, "import.gutenberg.file");
         String versificationFile = option(args, "import.versification.file");
         if (versificationFile != null) {
             versificationImportService.importAll(Path.of(versificationFile),
@@ -51,11 +56,13 @@ public class ImportCommand implements ApplicationRunner {
                     required(args, "import.versification.version"));
             return;
         }
-        if (blivreDir == null && maculaFile == null && alignmentTokens == null) {
+        if (blivreDir == null && maculaFile == null && alignmentTokens == null && gutenbergFile == null) {
             return;
         }
         String editionCode = required(args, "import.edition");
-        if (blivreDir != null) {
+        if (gutenbergFile != null) {
+            almeidaImportService.importOldTestament(editionCode, Path.of(gutenbergFile));
+        } else if (blivreDir != null) {
             blivreImportService.importEdition(editionCode, Path.of(blivreDir));
         } else if (maculaFile != null) {
             maculaImportService.importEdition(editionCode, Path.of(maculaFile),

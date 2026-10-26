@@ -54,9 +54,62 @@
 
 <th:block th:fragment="footer">
     <footer class="site-footer">
-        <div class="site-footer__inner">
-            <p id="edition-credits" class="credits"></p>
-        </div>
+        <section class="sources" aria-labelledby="sources-title">
+            <h2 id="sources-title" class="sources__title">Fontes usadas neste projeto</h2>
+            <p class="sources__project">Código-fonte deste projeto:
+                <a href="https://github.com/damico/biblia">github.com/damico/biblia</a>.</p>
+            <div class="sources__grid">
+                <div>
+                    <h3 class="sources__group">Textos, dados e alinhamentos</h3>
+                    <ul class="sources__list">
+                        <li th:each="s : ${sources}">
+                            <a th:href="${s.url}" th:text="${s.name}">Fonte</a>
+                            <span th:if="${s.maintainer}" th:text="'(' + ${s.maintainer} + ')'"></span>,
+                            <span th:text="${s.shortVersion()}"></span>.
+                            Licença: <span th:text="${s.license}"></span>.
+                            <span class="sources__attribution" th:text="${s.attribution}"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="sources__group">Métodos</h3>
+                    <ul class="sources__list">
+                        <li>Busca por palavra: coeficiente de Dice entre os versículos da Bíblia Livre e os do
+                            original correspondentes; estatística, não tradução.</li>
+                    </ul>
+                    <h3 class="sources__group">Tipografia (SIL Open Font License 1.1)</h3>
+                    <ul class="sources__list">
+                        <li><a href="https://github.com/adobe-fonts/source-serif">Source Serif 4</a> e
+                            <a href="https://github.com/adobe-fonts/source-sans">Source Sans 3</a> (Adobe)</li>
+                        <li><a href="https://software.sil.org/gentium/">Gentium Book Plus</a> (SIL International),
+                            para o grego</li>
+                        <li><a href="https://notofonts.github.io/">Noto Serif Hebrew</a> (Google), para o hebraico
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="sources__group">Software</h3>
+                    <ul class="sources__list">
+                        <li><a href="https://getbootstrap.com/">Bootstrap</a> 5.3.8 (MIT) e
+                            <a href="https://d3js.org/">D3</a> 7.9.0 (ISC), servidos localmente</li>
+                        <li><a href="https://spring.io/projects/spring-boot">Spring Boot</a> 4.1.2,
+                            Spring Framework 7.0.10 e Spring AI 2.0.2 (BOM declarado, nenhum módulo em uso)
+                            (Apache 2.0)</li>
+                        <li><a href="https://www.thymeleaf.org/">Thymeleaf</a> 3.1.5, AttoParser 2.0.7 e
+                            Unbescape 1.1.6 (Apache 2.0)</li>
+                        <li>Apache Tomcat 11.0.27, Jackson 3.1.7, HikariCP 7.0.2, Micrometer 1.17.2, SnakeYAML 2.6,
+                            Apache Log4j API 2.25.5, Apache Commons Logging 1.3.6 e JSpecify 1.0.1 (Apache 2.0)</li>
+                        <li>Logback 1.5.38 (EPL 1.0 ou LGPL 2.1), SLF4J 2.0.20 (MIT), Checker Framework qualifiers
+                            3.55.1 (MIT) e Jakarta Annotations 3.0.0 (EPL 2.0 ou GPL 2.0 com Classpath Exception)</li>
+                        <li><a href="https://jdbc.postgresql.org/">PostgreSQL JDBC Driver</a> 42.7.14 (BSD 2-Clause)
+                        </li>
+                        <li><a href="https://www.postgresql.org/">PostgreSQL</a> 16 com a extensão unaccent
+                            (PostgreSQL License), OpenJDK 21 (GPL 2.0 com Classpath Exception), Apache Maven (Apache
+                            2.0), Ubuntu 24.04 LTS e nginx (BSD 2-Clause)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
     </footer>
     <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/common.js}"></script>

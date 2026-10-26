@@ -228,15 +228,30 @@ var Biblia = (function () {
 
     function renderEdition(edition) {
         document.getElementById('edition-name').textContent = edition.name + ' - versão ' + edition.version;
-        var credits = document.getElementById('edition-credits');
-        credits.textContent = edition.attribution + ' ';
-        var link = element('a', null, 'Fonte original');
-        link.href = edition.sourceUrl;
-        credits.appendChild(link);
-        credits.appendChild(document.createTextNode(' (' + edition.license + ').'));
     }
 
     initPreferences();
+
+    // A verbete (lemma) with its most common English glosses beside it. The source writes multiword glosses
+    // with dots ("he.created"), shown here with spaces.
+    function verbete(lemma, lang, glosses) {
+        var box = element('span', 'verbete');
+        var text = element('span', 'verbete__lemma', lemma);
+        text.lang = lang;
+        box.appendChild(text);
+        if (glosses && glosses.length > 0) {
+            var english = element('span', 'verbete__english', 'Em inglês: ');
+            var words = element('span', null, englishText(glosses));
+            words.lang = 'en';
+            english.appendChild(words);
+            box.appendChild(english);
+        }
+        return box;
+    }
+
+    function englishText(glosses) {
+        return glosses.map(function (g) { return g.replace(/\./g, ' '); }).join(', ');
+    }
 
     return {
         url: url,
@@ -258,6 +273,8 @@ var Biblia = (function () {
         filterNames: FILTER_NAMES,
         label: label,
         plural: plural,
-        renderEdition: renderEdition
+        renderEdition: renderEdition,
+        verbete: verbete,
+        englishText: englishText
     };
 })();

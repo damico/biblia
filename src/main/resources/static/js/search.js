@@ -59,16 +59,16 @@
             var matches = group[1];
             if (matches.length === 0) {
                 box.appendChild(Biblia.element('p', 'search-empty',
-                    group[2] + ': nenhuma glosa em inglês contém "' + result.query + '".'));
+                    group[2] + ': nenhuma tradução em inglês contém "' + result.query + '".'));
                 return;
             }
             var t = table(group[2] + ' (' + edition.name + ')', [
-                {label: 'Lema'}, {label: 'Glosas encontradas'}, {label: 'Ocorrências com essas glosas', num: true},
-                {label: 'Versículos com o lema', num: true}, {label: ''}]);
+                {label: 'Verbete'}, {label: 'Em inglês'}, {label: 'Ocorrências com essas traduções', num: true},
+                {label: 'Versículos com o verbete', num: true}, {label: ''}]);
             matches.forEach(function (m) {
                 var row = Biblia.element('tr');
                 row.appendChild(lemmaCell(m.lemma, m.languageCode));
-                var glosses = Biblia.element('td', null, m.matchedGlosses.slice(0, 6).join(', ')
+                var glosses = Biblia.element('td', null, Biblia.englishText(m.matchedGlosses.slice(0, 6))
                     + (m.matchedGlosses.length > 6 ? ', ...' : ''));
                 glosses.lang = 'en';
                 row.appendChild(glosses);
@@ -95,12 +95,12 @@
             }
             var t = table(group[2] + ' (' + edition.name + '), em ' + rows[0].wordVerses.toLocaleString('pt-BR')
                 + ' versículos correspondentes', [
-                {label: 'Lema'}, {label: 'Glosas mais comuns'}, {label: 'Versículos em comum', num: true},
+                {label: 'Verbete'}, {label: 'Em inglês'}, {label: 'Versículos em comum', num: true},
                 {label: 'Associação'}, {label: ''}]);
             rows.forEach(function (a) {
                 var row = Biblia.element('tr');
                 row.appendChild(lemmaCell(a.lemma, a.languageCode));
-                var glosses = Biblia.element('td', null, a.glosses.join(', '));
+                var glosses = Biblia.element('td', null, Biblia.englishText(a.glosses));
                 glosses.lang = 'en';
                 row.appendChild(glosses);
                 row.appendChild(Biblia.element('td', 'num', a.together.toLocaleString('pt-BR') + ' de '
@@ -114,7 +114,7 @@
             box.appendChild(t.wrap);
         });
         box.appendChild(Biblia.element('p', 'article__caption',
-            '"Versículos em comum": em quantos dos versículos originais com o lema a Bíblia Livre usa a palavra '
+            '"Versículos em comum": em quantos dos versículos originais com o verbete a Bíblia Livre usa a palavra '
             + 'no versículo correspondente. Associação: coeficiente de Dice entre os dois conjuntos de '
             + 'versículos (1 = sempre juntos).'));
         document.getElementById('association-section').hidden = false;

@@ -42,6 +42,8 @@
         item.appendChild(Biblia.element('span', 'note-verse', 'v. ' + passage.verse + ' '));
         if (annotation.kind === 'reference') {
             item.appendChild(Biblia.element('span', 'note-kind', 'Citação: '));
+        } else if (annotation.kind === 'crossref') {
+            item.appendChild(Biblia.element('span', 'note-kind', 'Ver: '));
         }
         if (annotation.keyText) {
             item.appendChild(Biblia.element('em', null, annotation.keyText + ': '));
@@ -221,7 +223,7 @@
         if (segmented) {
             panelBody.appendChild(Biblia.element('p', 'word-panel__note',
                 'Esta palavra escrita tem ' + detail.segments.length + ' partes analisadas separadamente '
-                + '(prefixos, raiz e sufixos). Cada parte conta como uma ocorrência do seu lema.'));
+                + '(prefixos, raiz e sufixos). Cada parte conta como uma ocorrência do seu verbete.'));
         }
         detail.segments.forEach(function (segment) {
             panelBody.appendChild(renderSegment(detail, segment, segmented));
@@ -239,8 +241,8 @@
         panelBody.appendChild(formSection);
 
         panelBody.appendChild(Biblia.element('p', 'word-panel__note',
-            'Definições de dicionário ainda não estão disponíveis. A glosa é um auxílio de leitura, '
-            + 'não o significado completo da palavra.'));
+            'Definições de dicionário ainda não estão disponíveis. A tradução em inglês é um auxílio de '
+            + 'leitura da fonte, não o significado completo da palavra.'));
     }
 
     function renderSegment(detail, segment, segmented) {
@@ -256,7 +258,10 @@
         }
 
         var list = Biblia.element('dl', 'word-panel__list');
-        detailRow(list, 'Lema', segment.lemma, lang);
+        list.appendChild(Biblia.element('dt', null, 'Verbete'));
+        var verbete = Biblia.element('dd');
+        verbete.appendChild(Biblia.verbete(segment.lemma, lang, segment.lemmaGlosses));
+        list.appendChild(verbete);
         detailRow(list, 'Transliteração', segment.transliteration);
         if (segment.languageCode !== detail.languageCode) {
             detailRow(list, 'Idioma', Biblia.languageName(segment.languageCode));
@@ -272,11 +277,11 @@
         detailRow(list, 'Morfologia desta ocorrência', morphology);
         detailRow(list, 'Código morfológico', segment.morphCode);
         detailRow(list, 'Strong (referência auxiliar)', Biblia.strongLabel(segment.strong, segment.languageCode));
-        detailRow(list, 'Glosa em inglês', segment.gloss);
+        detailRow(list, 'Em inglês, nesta ocorrência', segment.gloss ? Biblia.englishText([segment.gloss]) : null);
         section.appendChild(list);
 
         var counts = Biblia.element('div', 'word-panel__counts');
-        counts.appendChild(Biblia.element('h3', null, 'Ocorrências do lema nesta edição'));
+        counts.appendChild(Biblia.element('h3', null, 'Ocorrências do verbete nesta edição'));
         counts.appendChild(Biblia.element('p', null, countsText(segment.lemmaCounts)));
         var lemmaLink = Biblia.element('a', null, 'Ver todas as ocorrências de ');
         var lemmaText = Biblia.element('span', null, segment.lemma);
@@ -440,16 +445,15 @@
             });
         });
 
-        var hint = document.getElementById('original-hint');
-        hint.textContent = aligned
-            ? 'Palavras com sublinhado tracejado estão alinhadas a uma palavra de ' + original.name
-                + ': clique para ver, ao lado, lema, morfologia e ocorrências. O alinhamento foi transferido '
-                + 'automaticamente do espanhol (RVR09) e pode conter erros. O número do versículo mostra o '
-                + 'versículo inteiro no original.'
-            : 'Clique numa palavra ou no número do versículo para ver, ao lado, o mesmo versículo em '
-                + original.name + ' e escolher a palavra original. Não há alinhamento palavra a palavra para '
-                + 'esta tradução, e a divisão de versículos pode diferir entre as edições.';
-        hint.hidden = false;
+        // Only the aligned translation needs a hint: its alignment was transferred automatically.
+        if (aligned) {
+            var hint = document.getElementById('original-hint');
+            hint.textContent = 'Palavras com sublinhado tracejado estão alinhadas a uma palavra de '
+                + original.name + ': clique para ver, ao lado, verbete, morfologia e ocorrências. O alinhamento foi '
+                + 'transferido automaticamente do espanhol (RVR09) e pode conter erros. O número do versículo '
+                + 'mostra o versículo inteiro no original.';
+            hint.hidden = false;
+        }
     }
 
     function openOriginalVerse(trigger) {
@@ -490,9 +494,9 @@
                 panelBody.appendChild(text);
             });
             panelBody.appendChild(Biblia.element('p', 'word-panel__note',
-                'Embaixo de cada palavra, a glosa em inglês da fonte: um auxílio de leitura, não a tradução '
+                'Embaixo de cada palavra, a tradução em inglês da fonte: um auxílio de leitura, não a tradução '
                 + 'dessa palavra no versículo. Não há alinhamento palavra a palavra para ' + translationEditionName
-                + ': escolha acima a palavra original correspondente para ver lema, morfologia e ocorrências.'));
+                + ': escolha acima a palavra original correspondente para ver verbete, morfologia e ocorrências.'));
         }).catch(function (error) {
             panelBody.textContent = 'Não foi possível carregar o original (' + error.message + ').';
         });
@@ -522,6 +526,346 @@
         }
     });
 
+    // Sharing: the reader picks verses of the chapter and gets an image of them to copy or save.
+
+    var SHARE_MAX_VERSES = 20;
+    var SHARE_WIDTH = 1080;
+    var SHARE_PADDING = 96;
+    var shareChapter = null;
+    var shareTexts = {};
+    var sharing = false;
+    var sharedVerses = [];
+    var lastPickedVerse = null;
+    var shareBlob = null;
+    var shareFileName = '';
+    var shareBar = document.getElementById('share-bar');
+    var shareDialog = document.getElementById('share-dialog');
+    var shareMessage = document.getElementById('share-message');
+
+    // Plain text of a verse, spaced the way renderTokens and renderAlignedTokens show it.
+    function passageText(passage) {
+        if (passage.tokens.length > 0 && isTranslation) {
+            return passage.tokens.map(function (t) { return t.surface + t.trailing; }).join('').trim();
+        }
+        if (passage.tokens.length > 0) {
+            return passage.tokens.map(function (t) {
+                var punctuation = t.trailing.trim();
+                return t.surface + punctuation + (/\u05BE$/.test(punctuation) ? '' : ' ');
+            }).join('').trim();
+        }
+        return passage.content;
+    }
+
+    // "16-18, 20": consecutive verses become ranges.
+    function verseRanges(verses) {
+        var parts = [];
+        verses.forEach(function (verse, i) {
+            if (i > 0 && verse === verses[i - 1] + 1) {
+                parts[parts.length - 1].end = verse;
+            } else {
+                parts.push({start: verse, end: verse});
+            }
+        });
+        return parts.map(function (p) { return p.start === p.end ? String(p.start) : p.start + '-' + p.end; })
+            .join(', ');
+    }
+
+    function shareReference() {
+        return chapterBookName + ' ' + chapterNumber + ':' + verseRanges(sharedVerses);
+    }
+
+    function updateShareBar() {
+        var status = document.getElementById('share-status');
+        var create = document.getElementById('share-create');
+        if (sharedVerses.length === 0) {
+            status.textContent = 'Toque nos versículos que deseja compartilhar. Com Shift, o clique seleciona '
+                + 'um intervalo.';
+        } else if (sharedVerses.length > SHARE_MAX_VERSES) {
+            status.textContent = shareReference() + ': selecione no máximo ' + SHARE_MAX_VERSES
+                + ' versículos para a imagem.';
+        } else {
+            status.textContent = shareReference() + ' ('
+                + Biblia.plural(sharedVerses.length, 'versículo', 'versículos') + ')';
+        }
+        create.disabled = sharedVerses.length === 0 || sharedVerses.length > SHARE_MAX_VERSES;
+    }
+
+    function setVersePicked(paragraph, picked) {
+        paragraph.classList.toggle('is-shared', picked);
+        paragraph.setAttribute('aria-checked', String(picked));
+    }
+
+    function pickVerse(paragraph, range) {
+        var verse = parseInt(paragraph.id.substring(1), 10);
+        var picked = sharedVerses.indexOf(verse) < 0;
+        var verses = [verse];
+        if (range && lastPickedVerse !== null) {
+            verses = [];
+            for (var v = Math.min(lastPickedVerse, verse); v <= Math.max(lastPickedVerse, verse); v++) {
+                verses.push(v);
+            }
+            picked = true;
+        }
+        verses.forEach(function (v) {
+            var target = document.getElementById('v' + v);
+            if (!target) {
+                return;
+            }
+            var index = sharedVerses.indexOf(v);
+            if (picked && index < 0) {
+                sharedVerses.push(v);
+            } else if (!picked && index >= 0) {
+                sharedVerses.splice(index, 1);
+            }
+            setVersePicked(target, picked);
+        });
+        sharedVerses.sort(function (a, b) { return a - b; });
+        lastPickedVerse = verse;
+        updateShareBar();
+    }
+
+    function startSharing() {
+        if (!panel.hidden) {
+            closePanel();
+        }
+        sharing = true;
+        document.body.classList.add('is-sharing');
+        document.querySelectorAll('#chapter-text .verse').forEach(function (paragraph) {
+            paragraph.setAttribute('role', 'checkbox');
+            paragraph.setAttribute('aria-checked', 'false');
+            paragraph.tabIndex = 0;
+        });
+        // A verse the reader arrived at (#v16) starts selected.
+        var target = document.querySelector('#chapter-text .verse.is-target');
+        if (target) {
+            pickVerse(target, false);
+        }
+        updateShareBar();
+        shareBar.hidden = false;
+        var first = target || document.querySelector('#chapter-text .verse');
+        if (first) {
+            first.focus({preventScroll: Boolean(target)});
+        }
+    }
+
+    function stopSharing() {
+        sharing = false;
+        document.body.classList.remove('is-sharing');
+        document.querySelectorAll('#chapter-text .verse').forEach(function (paragraph) {
+            paragraph.classList.remove('is-shared');
+            paragraph.removeAttribute('role');
+            paragraph.removeAttribute('aria-checked');
+            paragraph.removeAttribute('tabindex');
+        });
+        sharedVerses = [];
+        lastPickedVerse = null;
+        shareBar.hidden = true;
+        document.getElementById('share-start').focus();
+    }
+
+    // While sharing, a click anywhere in a verse picks it instead of opening words or notes.
+    document.getElementById('chapter-text').addEventListener('click', function (event) {
+        if (!sharing) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        var paragraph = event.target.closest('.verse');
+        if (paragraph) {
+            pickVerse(paragraph, event.shiftKey);
+        }
+    }, true);
+    document.getElementById('chapter-text').addEventListener('keydown', function (event) {
+        if (sharing && (event.key === ' ' || event.key === 'Enter') && event.target.classList.contains('verse')) {
+            event.preventDefault();
+            pickVerse(event.target, event.shiftKey);
+        }
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && sharing && !shareDialog.open) {
+            stopSharing();
+        }
+    });
+    document.getElementById('share-start').addEventListener('click', function () {
+        if (sharing) {
+            stopSharing();
+        } else {
+            startSharing();
+        }
+    });
+    document.getElementById('share-cancel').addEventListener('click', stopSharing);
+    document.getElementById('share-create').addEventListener('click', createShareImage);
+    document.getElementById('share-close').addEventListener('click', function () {
+        shareDialog.close();
+    });
+
+    function cssValue(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    // Lines of runs ({text, number}) that fit the text width at the given font size.
+    function layoutShareText(ctx, fonts, size, width) {
+        var lines = [];
+        var line = [];
+        var lineWidth = 0;
+        ctx.font = size + 'px ' + fonts.text;
+        var space = ctx.measureText(' ').width;
+        sharedVerses.forEach(function (verse) {
+            var words = shareTexts[verse].split(/\s+/).filter(Boolean);
+            if (sharedVerses.length > 1) {
+                words.unshift({number: String(verse)});
+            }
+            words.forEach(function (word) {
+                var run = typeof word === 'string' ? {text: word, number: false} : {text: word.number, number: true};
+                ctx.font = run.number ? '600 ' + Math.round(size * 0.6) + 'px ' + fonts.ui : size + 'px ' + fonts.text;
+                run.width = ctx.measureText(run.text).width;
+                if (line.length > 0 && lineWidth + space + run.width > width) {
+                    // A verse number moves to the next line with the first word of its verse.
+                    var carried = line[line.length - 1].number && line.length > 1 ? line.pop() : null;
+                    lines.push(line);
+                    line = [];
+                    lineWidth = 0;
+                    if (carried) {
+                        carried.gap = 0;
+                        lineWidth = carried.width;
+                        line.push(carried);
+                    }
+                }
+                run.gap = line.length === 0 ? 0 : (line[line.length - 1].number ? space * 0.5 : space);
+                lineWidth += run.gap + run.width;
+                line.push(run);
+            });
+        });
+        if (line.length > 0) {
+            lines.push(line);
+        }
+        return lines;
+    }
+
+    function drawShareImage(fonts) {
+        var colors = {
+            bg: cssValue('--bg'), text: cssValue('--text'), accent: cssValue('--link')
+        };
+        var rtl = shareChapter.edition.scriptDirection === 'rtl';
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+        var textWidth = SHARE_WIDTH - 2 * SHARE_PADDING;
+        var footerHeight = 150;
+        var minHeight = SHARE_WIDTH;
+        var maxHeight = Math.round(SHARE_WIDTH * 1.25);
+
+        // The largest font size whose text fits a 4:5 image; long passages get a taller image.
+        var size = 72;
+        var lines = layoutShareText(ctx, fonts, size, textWidth);
+        var leading = rtl ? 1.8 : 1.5;
+        while (size > 30 && 2 * SHARE_PADDING + lines.length * size * leading + footerHeight > maxHeight) {
+            size -= 2;
+            lines = layoutShareText(ctx, fonts, size, textWidth);
+        }
+        var lineHeight = size * leading;
+        var textHeight = lines.length * lineHeight;
+        var height = Math.max(minHeight, Math.ceil(2 * SHARE_PADDING + textHeight + footerHeight));
+
+        canvas.width = SHARE_WIDTH;
+        canvas.height = height;
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(0, 0, SHARE_WIDTH, height);
+
+        // Text centered in the space above the footer.
+        var top = SHARE_PADDING + Math.max(0, (height - 2 * SHARE_PADDING - footerHeight - textHeight) / 2);
+        ctx.textBaseline = 'alphabetic';
+        ctx.direction = rtl ? 'rtl' : 'ltr';
+        ctx.textAlign = rtl ? 'right' : 'left';
+        lines.forEach(function (line, n) {
+            var y = top + n * lineHeight + size * 1.1;
+            var x = rtl ? SHARE_WIDTH - SHARE_PADDING : SHARE_PADDING;
+            line.forEach(function (run) {
+                x += rtl ? -run.gap : run.gap;
+                if (run.number) {
+                    ctx.font = '600 ' + Math.round(size * 0.6) + 'px ' + fonts.ui;
+                    ctx.fillStyle = colors.accent;
+                    ctx.fillText(run.text, x, y - size * 0.3);
+                } else {
+                    ctx.font = size + 'px ' + fonts.text;
+                    ctx.fillStyle = colors.text;
+                    ctx.fillText(run.text, x, y);
+                }
+                x += rtl ? -run.width : run.width;
+            });
+        });
+
+        // Footer: rule and reference, always left to right.
+        var footerTop = height - SHARE_PADDING - footerHeight + 56;
+        ctx.direction = 'ltr';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = colors.accent;
+        ctx.fillRect(SHARE_PADDING, footerTop, 96, 5);
+        ctx.fillStyle = colors.text;
+        ctx.font = '700 44px ' + fonts.ui;
+        ctx.fillText(shareReference(), SHARE_PADDING, footerTop + 76);
+        return canvas;
+    }
+
+    function createShareImage() {
+        var sample = document.getElementById('v' + sharedVerses[0]);
+        var fonts = {text: getComputedStyle(sample).fontFamily, ui: cssValue('--font-ui')};
+        var sampleText = shareTexts[sharedVerses[0]].substring(0, 40);
+        // Web fonts load on demand; the canvas only draws with fonts that are already loaded.
+        Promise.all([
+            document.fonts.load('48px ' + fonts.text, sampleText),
+            document.fonts.load('700 44px ' + fonts.ui, 'Abc')
+        ]).catch(function () {
+            // fallback fonts are fine
+        }).then(function () {
+            drawShareImage(fonts).toBlob(showShareDialog, 'image/png');
+        });
+    }
+
+    function showShareDialog(blob) {
+        var reference = shareReference();
+        shareBlob = blob;
+        shareFileName = reference.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.png';
+        var preview = document.getElementById('share-preview');
+        if (preview.src) {
+            URL.revokeObjectURL(preview.src);
+        }
+        preview.src = URL.createObjectURL(blob);
+        preview.alt = 'Imagem de ' + reference + ', ' + shareChapter.edition.name;
+        var download = document.getElementById('share-download');
+        download.href = preview.src;
+        download.download = shareFileName;
+
+        var copy = document.getElementById('share-copy');
+        var canCopy = Boolean(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem);
+        copy.disabled = !canCopy;
+        shareMessage.textContent = canCopy ? ''
+            : 'Este navegador só permite copiar imagens em conexão segura (HTTPS). Use "Baixar imagem".';
+
+        var file = new File([blob], shareFileName, {type: 'image/png'});
+        document.getElementById('share-send').hidden =
+            !(navigator.canShare && navigator.canShare({files: [file]}));
+        shareDialog.showModal();
+        if (canCopy) {
+            copy.focus();
+        }
+    }
+
+    document.getElementById('share-copy').addEventListener('click', function () {
+        // The blob is ready before the click, so the write happens inside the user gesture (Safari).
+        navigator.clipboard.write([new ClipboardItem({'image/png': shareBlob})]).then(function () {
+            shareMessage.textContent = 'Imagem copiada. Cole no aplicativo em que vai compartilhar.';
+        }).catch(function () {
+            shareMessage.textContent = 'Não foi possível copiar a imagem. Use "Baixar imagem".';
+        });
+    });
+    document.getElementById('share-send').addEventListener('click', function () {
+        var file = new File([shareBlob], shareFileName, {type: 'image/png'});
+        navigator.share({files: [file], title: shareReference()}).catch(function () {
+            // the reader closed the share sheet
+        });
+    });
+
     function renderChapter(chapter) {
         var title = chapter.book.name + ' ' + chapter.chapter;
         document.getElementById('chapter-title').textContent = title;
@@ -534,7 +878,9 @@
         var text = document.getElementById('chapter-text');
         text.dir = chapter.edition.scriptDirection;
         text.lang = Biblia.languageTag(chapter.edition.languageCode);
+        shareChapter = chapter;
         chapter.passages.forEach(function (passage) {
+            shareTexts[passage.verse] = passageText(passage);
             if (passage.heading) {
                 text.appendChild(Biblia.element('p', 'verse-heading', passage.heading));
             }
@@ -555,6 +901,7 @@
         document.getElementById('notes-section').hidden = noteCount === 0;
         document.getElementById('added-legend').hidden = !hasAdded;
         document.getElementById('word-hint').hidden = !hasTokens;
+        document.getElementById('share-start').hidden = chapter.passages.length === 0;
         if (isTranslation && hasAlignment) {
             var firstAligned = document.querySelector('#chapter-text .pt-aligned');
             Biblia.getJson('/api/tokens/' + firstAligned.dataset.tokenId).then(function (detail) {

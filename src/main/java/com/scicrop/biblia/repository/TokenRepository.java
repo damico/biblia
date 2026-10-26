@@ -116,6 +116,7 @@ public class TokenRepository {
                         rs.getString("strong"),
                         rs.getString("gloss"),
                         rs.getString("transliteration"),
+                        null,
                         null))
                 .list();
         return jdbcClient.sql(SQL_TOKEN)

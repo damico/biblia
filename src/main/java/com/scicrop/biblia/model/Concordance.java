@@ -7,6 +7,7 @@ public record Concordance(
         Edition edition,
         Integer lexemeId,
         String lemma,
+        List<String> lemmaGlosses,
         String form,
         String bookCode,
         Map<String, String> filters,

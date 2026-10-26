@@ -12,6 +12,7 @@ import com.scicrop.biblia.model.TokenDetail;
 import com.scicrop.biblia.repository.ConcordanceRepository;
 import com.scicrop.biblia.repository.ConcordanceRepository.PassageRef;
 import com.scicrop.biblia.repository.EditionRepository;
+import com.scicrop.biblia.repository.SearchRepository;
 import com.scicrop.biblia.repository.TokenRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,15 +30,20 @@ public class ConcordanceService {
     /** Translation shown next to each hit, by verse correspondence (not a word alignment). */
     private static final String PARALLEL_EDITION = "blivre-n4";
 
+    /** English glosses shown next to a lemma. */
+    private static final int LEMMA_GLOSSES = 3;
+
     private final EditionRepository editionRepository;
     private final TokenRepository tokenRepository;
     private final ConcordanceRepository concordanceRepository;
+    private final SearchRepository searchRepository;
 
     public ConcordanceService(EditionRepository editionRepository, TokenRepository tokenRepository,
-                              ConcordanceRepository concordanceRepository) {
+                              ConcordanceRepository concordanceRepository, SearchRepository searchRepository) {
         this.editionRepository = editionRepository;
         this.tokenRepository = tokenRepository;
         this.concordanceRepository = concordanceRepository;
+        this.searchRepository = searchRepository;
     }
 
     @Transactional(readOnly = true)
@@ -45,9 +51,12 @@ public class ConcordanceService {
         TokenDetail token = tokenRepository.findDetail(tokenId, CANON)
                 .orElseThrow(() -> notFound("Unknown token: " + tokenId));
         int editionId = editionId(token.editionCode());
+        Map<Integer, List<String>> glosses = searchRepository.findTopGlosses(editionId,
+                token.segments().stream().map(SegmentDetail::lexemeId).toList(), LEMMA_GLOSSES);
         List<SegmentDetail> segments = token.segments().stream()
-                .map(s -> s.withLemmaCounts(
-                        concordanceRepository.count(editionId, ConcordanceQuery.ofLexeme(s.lexemeId()))))
+                .map(s -> s.withLemma(
+                        concordanceRepository.count(editionId, ConcordanceQuery.ofLexeme(s.lexemeId())),
+                        glosses.getOrDefault(s.lexemeId(), List.of())))
                 .toList();
         OccurrenceCounts formCounts = concordanceRepository.count(editionId, ConcordanceQuery.ofForm(token.normalized()));
         return new TokenDetail(token.id(), token.editionCode(), token.editionName(), token.languageCode(),
@@ -68,6 +77,10 @@ public class ConcordanceService {
         String lemma = byLexeme
                 ? tokenRepository.findLemma(query.lexeme()).orElseThrow(() -> notFound("Unknown lexeme: " + query.lexeme()))
                 : null;
+        List<String> lemmaGlosses = byLexeme
+                ? searchRepository.findTopGlosses(editionId, List.of(query.lexeme()), LEMMA_GLOSSES)
+                        .getOrDefault(query.lexeme(), List.of())
+                : List.of();
 
         OccurrenceCounts counts = concordanceRepository.count(editionId, query);
         List<PassageRef> refs = concordanceRepository.findPassages(editionId, query, CANON);
@@ -92,6 +105,7 @@ public class ConcordanceService {
                 edition,
                 query.lexeme(),
                 lemma,
+                lemmaGlosses,
                 byForm ? query.form() : null,
                 query.book(),
                 query.morphFilters(),

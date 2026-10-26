@@ -21,6 +21,17 @@ public class PassageRepository {
             SELECT count(*) FROM passages WHERE edition_id = :editionId
             """;
 
+    private static final String SQL_COUNT_BY_BOOKS = """
+            SELECT count(*)
+              FROM passages p
+              JOIN books b ON b.id = p.book_id
+             WHERE p.edition_id = :editionId AND b.usfm_code IN (:usfmCodes)
+            """;
+
+    private static final String SQL_SHIFT_SORT_ORDER = """
+            UPDATE passages SET sort_order = sort_order + :offset WHERE edition_id = :editionId
+            """;
+
     private static final String SQL_INSERT_PASSAGE = """
             INSERT INTO passages (edition_id, book_id, chapter, verse, sort_order, heading, content)
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -106,6 +117,26 @@ public class PassageRepository {
                 .param("editionId", editionId)
                 .query(Long.class)
                 .single();
+    }
+
+    public long countByBooks(int editionId, List<String> usfmCodes) {
+        return jdbcClient.sql(SQL_COUNT_BY_BOOKS)
+                .param("editionId", editionId)
+                .param("usfmCodes", usfmCodes)
+                .query(Long.class)
+                .single();
+    }
+
+    /**
+     * Moves every passage of an edition down by offset places, freeing sort_order 1..offset for passages
+     * that come first (an Old Testament added to an edition that had only the New).
+     * The offset must not be smaller than the current largest sort_order, so no value is taken twice.
+     */
+    public int shiftSortOrder(int editionId, int offset) {
+        return jdbcClient.sql(SQL_SHIFT_SORT_ORDER)
+                .param("editionId", editionId)
+                .param("offset", offset)
+                .update();
     }
 
     /** Removes every passage of an edition; tokens, analyses, annotations and alignments go with them. */
