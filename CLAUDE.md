@@ -66,14 +66,14 @@ Jamais use estes caracteres no codigo, nos templates ou em textos de UI. Use som
 
 ## Ambiente de testes
 
-- Maquina de testes (aplicacao e banco): Ubuntu 24.04, `192.168.68.137`, usuario sudoer `jdamico` (acesso SSH por chave).
+- Maquina de testes (aplicacao e banco): Ubuntu 24.04, usuario sudoer com acesso SSH por chave. Endereco e usuario nao ficam no repositorio.
 - Spring Boot roda na porta `8089`.
-- A aplicacao roda sob o context path `/biblia` (`server.servlet.context-path`), o mesmo caminho publico de `https://josedamico.com.br/biblia`: o nginx de producao repassa `/biblia/` sem reescrever o caminho, pela VPN, para esta maquina (`10.8.0.11:8089`).
+- A aplicacao roda sob o context path `/biblia` (`server.servlet.context-path`), o mesmo caminho publico de `https://josedamico.com.br/biblia`: o nginx de producao repassa `/biblia/` sem reescrever o caminho, pela VPN, para a porta `8089` desta maquina.
   - Templates montam URLs com `@{...}`, que ja incluem o prefixo. No JS, toda URL raiz (paginas e API) passa por `Biblia.url()` (`common.js`, le o prefixo da meta `app-base` do layout); `Biblia.getJson()` ja aplica o prefixo. Nunca escreva `'/api/...'` ou `location.href = '/...'` direto.
 - PostgreSQL 16 na mesma maquina, ouvindo apenas em `localhost:5432`.
   - Banco `biblia`, dono/usuario `biblia`.
-  - A senha do usuario `biblia` fica em `~/.pgpass` do usuario `jdamico` na maquina de testes. Nunca grave senhas no codigo nem no repositorio.
-  - Para acessar a partir da maquina de desenvolvimento, use tunel SSH: `ssh -L 5432:localhost:5432 jdamico@192.168.68.137`.
+  - A senha do usuario `biblia` fica em `~/.pgpass` do usuario sudoer na maquina de testes. Nunca grave senhas no codigo nem no repositorio.
+  - Para acessar a partir da maquina de desenvolvimento, use tunel SSH: `ssh -L 5432:localhost:5432 <usuario>@<maquina-de-testes>`.
 - Build local exige JDK 21 (o Maven da maquina de desenvolvimento usa o 17 por padrao):
   `JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 mvn -DskipTests package`.
 - Deploy na maquina de testes: `./deploy.sh` (build, copia `biblia.jar` e `db/` para `~/biblia/`, roda `db/migrate.sh` e reinicia o servico).
