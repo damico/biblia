@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Busca - Bíblia Interlinear')}"></head>
+<body>
+<th:block th:replace="~{fragments/layout :: header}"></th:block>
+
+<main id="content" class="article" tabindex="-1">
+    <p class="article__category">Busca nos dois testamentos</p>
+    <h1 class="article__title" id="search-title">Busca</h1>
+    <p class="article__dek">
+        Procure uma palavra em português (no texto da Bíblia Livre) ou em inglês (nas glosas dos textos originais).
+    </p>
+
+    <p id="load-error" class="error-message" role="alert" hidden></p>
+
+    <section aria-labelledby="gloss-title" id="gloss-section" hidden>
+        <h2 id="gloss-title" class="section-title">Nas glosas em inglês</h2>
+        <p class="article__caption">
+            Lemas hebraicos, aramaicos e gregos cujas glosas em inglês contêm a palavra. A glosa é um auxílio de
+            leitura da fonte (Cherith no Antigo Testamento, Berean no Novo), não o significado completo do lema.
+        </p>
+        <div id="gloss-results"></div>
+    </section>
+
+    <section aria-labelledby="association-title" id="association-section" hidden>
+        <h2 id="association-title" class="section-title">Lemas originais associados</h2>
+        <p class="article__caption">
+            Não há alinhamento palavra a palavra para a Bíblia Livre. Esta lista mostra os lemas que mais aparecem
+            nos versículos originais correspondentes aos versículos em que a Bíblia Livre usa a palavra
+            (correspondência de versículos TVTMS). É uma estatística de coincidência, não uma tradução: confira as
+            ocorrências antes de concluir que um lema corresponde à palavra.
+        </p>
+        <div id="association-results"></div>
+    </section>
+
+    <section aria-labelledby="verses-title" id="verses-section" hidden>
+        <h2 id="verses-title" class="section-title">Na Bíblia Livre</h2>
+        <p id="verses-summary" class="article__caption"></p>
+        <ol id="verse-results" class="hits"></ol>
+    </section>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+<script th:src="@{/js/search.js}"></script>
+</body>
+</html>

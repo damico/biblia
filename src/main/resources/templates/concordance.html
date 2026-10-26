@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Concordância - Bíblia Interlinear')}"></head>
+<body th:attr="data-edition=${edition}">
+<th:block th:replace="~{fragments/layout :: header}"></th:block>
+
+<main id="content" class="article" tabindex="-1">
+    <p class="article__category" id="edition-name"></p>
+    <h1 class="article__title" id="concordance-title">Concordância</h1>
+    <p class="article__dek" id="concordance-dek"></p>
+
+    <p id="load-error" class="error-message" role="alert" hidden></p>
+
+    <section aria-labelledby="scope-title" class="scope">
+        <h2 id="scope-title" class="visually-hidden">Escopo da busca</h2>
+        <dl id="scope-list" class="scope__list"></dl>
+    </section>
+
+    <section aria-labelledby="totals-title">
+        <h2 id="totals-title" class="section-title">Totais</h2>
+        <dl id="totals" class="totals"></dl>
+    </section>
+
+    <form id="filters" class="filters" aria-labelledby="filters-title">
+        <h2 id="filters-title" class="section-title">Filtrar</h2>
+        <div class="filters__grid" id="filters-grid"></div>
+        <div class="filters__actions">
+            <button type="submit" class="action-button">Aplicar filtros</button>
+            <a id="clear-filters" href="#">Limpar filtros</a>
+        </div>
+    </form>
+
+    <section id="links-section" class="links" aria-labelledby="links-title" hidden>
+        <h2 id="links-title" class="section-title">Mapa de ligações</h2>
+        <form id="links-form" class="links__controls">
+            <fieldset class="links__modes">
+                <legend>O que cada linha liga</legend>
+                <label><input type="radio" name="mode" value="fan"> A partir do versículo selecionado</label>
+                <label><input type="radio" name="mode" value="pairs"> Entre as ocorrências de dois livros</label>
+                <label><input type="radio" name="mode" value="lxx"> Entre os testamentos, pela Septuaginta</label>
+            </fieldset>
+            <label class="links__axis">
+                <span>Eixo esquerdo</span>
+                <select id="links-left" name="left"></select>
+            </label>
+            <label class="links__axis">
+                <span>Eixo direito</span>
+                <select id="links-right" name="right"></select>
+            </label>
+        </form>
+        <p id="links-explanation" class="article__caption"></p>
+        <p id="links-summary" class="links__summary" aria-live="polite"></p>
+        <div class="links__wide">
+            <div class="links__zoom" role="group" aria-label="Zoom do mapa">
+                <span>Eixo esquerdo</span>
+                <button type="button" class="link-button" data-zoom="left" data-factor="2">Ampliar</button>
+                <button type="button" class="link-button" data-zoom="left" data-factor="0.5">Reduzir</button>
+                <span>Eixo direito</span>
+                <button type="button" class="link-button" data-zoom="right" data-factor="2">Ampliar</button>
+                <button type="button" class="link-button" data-zoom="right" data-factor="0.5">Reduzir</button>
+                <button type="button" class="link-button" data-zoom="reset">Ver tudo</button>
+            </div>
+            <p class="links__help">
+                Clique num livro ou capítulo de um eixo para ampliá-lo, ou use a roda do mouse sobre o eixo e arraste
+                para mover; cada eixo amplia sozinho. As linhas viram versículo a versículo quando a área visível tem
+                poucos pares, e a lista "Versículos na área visível", abaixo do mapa, mostra o texto dos dois lados.
+                Clique numa linha agrupada para ampliar os dois eixos até ela.
+            </p>
+            <div id="links-canvas" class="links__canvas"></div>
+            <section id="links-detail" class="links__detail" aria-live="polite" hidden></section>
+            <section class="links__reading" aria-labelledby="links-reading-title">
+                <h3 id="links-reading-title" class="links__detail-title">Versículos na área visível</h3>
+                <p id="links-reading-status" class="links__help" aria-live="polite"></p>
+                <div id="links-reading-body"></div>
+            </section>
+        </div>
+    </section>
+
+    <section aria-labelledby="by-book-title">
+        <h2 id="by-book-title" class="section-title">Por livro</h2>
+        <div class="table-wrap">
+            <table class="data-table">
+                <caption class="visually-hidden">Ocorrências e versículos por livro</caption>
+                <thead>
+                <tr>
+                    <th scope="col">Livro</th>
+                    <th scope="col" class="num">Ocorrências</th>
+                    <th scope="col" class="num">Versículos</th>
+                </tr>
+                </thead>
+                <tbody id="by-book"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section aria-labelledby="hits-title">
+        <h2 id="hits-title" class="section-title">Ocorrências no contexto</h2>
+        <p class="article__caption">
+            O texto em português são os versículos correspondentes da Bíblia Livre, pela tabela de
+            correspondência de versículos (TVTMS). Não é um alinhamento palavra a palavra. Quando a numeração
+            difere, o número do versículo em português aparece antes do texto.
+        </p>
+        <ol id="hits" class="hits"></ol>
+        <button type="button" id="load-more" class="action-button" hidden>Carregar mais</button>
+    </section>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+<script th:src="@{/js/concordance.js}"></script>
+<script th:src="@{/vendor/d3/d3.min.js}"></script>
+<script th:src="@{/js/links.js}"></script>
+</body>
+</html>

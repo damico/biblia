@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="app-base" th:content="@{/}">
+    <title th:text="${title}">Bíblia Interlinear</title>
+    <script th:src="@{/js/preferences.js}"></script>
+    <link rel="stylesheet" th:href="@{/vendor/fonts/fonts.css}">
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<th:block th:fragment="header">
+    <a class="skip-link" href="#content">Pular para o conteúdo</a>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a class="site-brand" th:href="@{/}">Bíblia Interlinear</a>
+            <form class="site-search" role="search" th:action="@{/search}" method="get">
+                <label class="visually-hidden" for="site-search-input">Buscar palavra em português ou inglês</label>
+                <input id="site-search-input" name="q" type="search" required maxlength="40"
+                       placeholder="Buscar palavra (português ou inglês)">
+                <button type="submit" class="action-button">Buscar</button>
+            </form>
+            <nav aria-label="Principal" class="site-nav">
+                <a th:href="@{/}">Livros</a>
+                <button type="button" class="pref-toggle" aria-expanded="false" aria-controls="reading-prefs">
+                    Preferências
+                </button>
+            </nav>
+        </div>
+        <div id="reading-prefs" class="reading-prefs" hidden>
+            <fieldset>
+                <legend>Tema</legend>
+                <label><input type="radio" name="theme" value="light"> Claro</label>
+                <label><input type="radio" name="theme" value="dark"> Escuro</label>
+                <label><input type="radio" name="theme" value="sepia"> Sépia</label>
+            </fieldset>
+            <fieldset>
+                <legend>Fonte</legend>
+                <label><input type="radio" name="font" value="serif"> Editorial</label>
+                <label><input type="radio" name="font" value="sans"> Simples</label>
+            </fieldset>
+            <fieldset>
+                <legend>Tamanho</legend>
+                <label><input type="radio" name="size" value="small"> Menor</label>
+                <label><input type="radio" name="size" value="normal"> Padrão</label>
+                <label><input type="radio" name="size" value="large"> Maior</label>
+            </fieldset>
+        </div>
+    </header>
+</th:block>
+
+<th:block th:fragment="footer">
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <p id="edition-credits" class="credits"></p>
+        </div>
+    </footer>
+    <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/common.js}"></script>
+</th:block>
+
+</body>
+</html>

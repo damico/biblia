@@ -1,0 +1,1248 @@
+/* Design tokens and reading layout, following design.md. */
+
+:root {
+    color-scheme: light;
+    --font-reading: "Source Serif 4 Variable", Georgia, serif;
+    --font-ui: "Source Sans 3 Variable", system-ui, sans-serif;
+    --font-code: ui-monospace, "SFMono-Regular", Consolas, monospace;
+
+    --bg: #fcfbf8;
+    --surface: #ffffff;
+    --text: #202322;
+    --muted: #555d64;
+    --link: #17518a;
+    --rule: #d9dcd9;
+    --focus: #17518a;
+
+    --reading-measure: 70ch;
+    --article-font-size: 1.25rem;
+    --article-leading: 1.6;
+    --gutter: clamp(1rem, 3vw, 2rem);
+
+    --bs-body-bg: var(--bg);
+    --bs-body-color: var(--text);
+    --bs-body-font-family: var(--font-ui);
+    --bs-link-color: var(--link);
+    --bs-link-color-rgb: 23, 81, 138;
+    --bs-link-hover-color: var(--link);
+    --bs-border-color: var(--rule);
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #16191e;
+    --surface: #20262e;
+    --text: #e8e9e8;
+    --muted: #a6adba;
+    --link: #9ccaff;
+    --rule: #464d57;
+    --focus: #9ccaff;
+    --bs-link-color-rgb: 156, 202, 255;
+}
+
+[data-theme="sepia"] {
+    color-scheme: light;
+    --bg: #f7f3eb;
+    --surface: #fcfaf5;
+    --text: #21262d;
+    --muted: #555d64;
+    --link: #1b4c75;
+    --rule: #d7d2c7;
+    --focus: #1b4c75;
+    --bs-link-color-rgb: 27, 76, 117;
+}
+
+[data-reading-font="sans"] {
+    --font-reading: "Source Sans 3 Variable", system-ui, sans-serif;
+}
+
+[data-reading-size="small"] {
+    --article-font-size: 1.0625rem;
+}
+
+[data-reading-size="large"] {
+    --article-font-size: 1.5rem;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
+    background: var(--bg);
+    font-family: var(--font-ui);
+}
+
+a {
+    color: var(--link);
+    text-underline-offset: 0.14em;
+}
+
+a:hover {
+    color: var(--link);
+    text-decoration-thickness: 0.12em;
+}
+
+:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+}
+
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    color: var(--link);
+    z-index: 10;
+}
+
+.skip-link:focus {
+    left: 1rem;
+}
+
+/* Header and footer */
+
+.site-header {
+    border-bottom: 1px solid var(--rule);
+}
+
+.site-header__inner,
+.site-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: 0.75rem var(--gutter);
+}
+
+.site-brand {
+    font-family: var(--font-reading);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.site-brand:hover {
+    color: var(--text);
+}
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.pref-toggle {
+    font: inherit;
+    color: var(--link);
+    background: none;
+    border: 0;
+    padding: 0.25rem 0;
+    text-decoration: underline;
+    text-underline-offset: 0.14em;
+    cursor: pointer;
+}
+
+.reading-prefs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: 0.5rem var(--gutter) 1rem;
+}
+
+.reading-prefs[hidden] {
+    display: none;
+}
+
+.reading-prefs fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0;
+}
+
+.reading-prefs legend {
+    float: none;
+    width: 100%;
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.reading-prefs label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2rem;
+}
+
+.site-footer {
+    margin-top: auto;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.credits {
+    max-width: var(--reading-measure);
+    margin: 0;
+}
+
+/* Article column */
+
+.article {
+    width: min(calc(100% - 2 * var(--gutter)), var(--reading-measure));
+    margin: 0 auto;
+    padding: 2.5rem 0 3rem;
+}
+
+.article:focus {
+    outline: none;
+}
+
+.article__category {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    color: var(--muted);
+}
+
+.article__title {
+    font-family: var(--font-reading);
+    font-optical-sizing: auto;
+    font-size: clamp(2.35rem, 4vw, 3.7rem);
+    font-weight: 600;
+    line-height: 1.12;
+    margin: 0 0 1rem;
+}
+
+.article__dek {
+    font-family: var(--font-reading);
+    font-size: 1.25rem;
+    line-height: 1.45;
+    color: var(--muted);
+}
+
+.article__caption {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.section-title {
+    font-family: var(--font-reading);
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 2.25rem 0 0.75rem;
+}
+
+.error-message {
+    padding: 0.75rem 1rem;
+    border-left: 4px solid #b3261e;
+    font-weight: 600;
+}
+
+/* Book list */
+
+.book-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--rule);
+}
+
+.book-list > li {
+    border-bottom: 1px solid var(--rule);
+}
+
+.book-list summary {
+    padding: 0.6rem 0;
+    font-family: var(--font-reading);
+    font-size: 1.15rem;
+    cursor: pointer;
+}
+
+.chapter-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    list-style: none;
+    padding: 0 0 1rem;
+    margin: 0;
+}
+
+.chapter-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+}
+
+/* Chapter reading */
+
+.chapter-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--rule);
+}
+
+.chapter-select {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chapter-select select {
+    font: inherit;
+    min-height: 2.25rem;
+    padding: 0 0.5rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: 2px;
+}
+
+.article__body {
+    font-family: var(--font-reading);
+    font-optical-sizing: auto;
+    font-size: var(--article-font-size);
+    font-weight: 400;
+    line-height: var(--article-leading);
+    /* start: left for Latin and Greek, right for Hebrew and Aramaic */
+    text-align: start;
+    overflow-wrap: break-word;
+}
+
+.verse {
+    margin: 0 0 0.6em;
+    scroll-margin-top: 1rem;
+}
+
+.verse-num {
+    font-family: var(--font-ui);
+    font-size: 0.7em;
+    font-weight: 600;
+    color: var(--muted);
+    vertical-align: 0.35em;
+}
+
+.verse-heading {
+    margin: 1.5em 0 0.6em;
+    font-style: italic;
+    color: var(--muted);
+}
+
+.added {
+    font-style: italic;
+}
+
+.note-ref {
+    font-family: var(--font-ui);
+    font-size: 0.8em;
+    padding: 0 0.1em;
+}
+
+.notes {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.95rem;
+}
+
+.notes ol {
+    list-style: none;
+    padding: 0;
+}
+
+.notes li {
+    margin-bottom: 0.6rem;
+    scroll-margin-top: 1rem;
+}
+
+.notes li:target {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+}
+
+.note-label {
+    font-weight: 600;
+}
+
+.note-verse,
+.note-kind {
+    color: var(--muted);
+}
+
+.note-back {
+    white-space: nowrap;
+}
+
+/* Original languages. Source Serif 4 has no polytonic Greek, so Greek uses Gentium Book Plus. */
+
+:lang(grc) {
+    font-family: "Gentium Book Plus", var(--font-reading);
+}
+
+[data-reading-font="sans"] :lang(grc) {
+    font-family: "Source Sans 3 Variable", system-ui, sans-serif;
+}
+
+.word {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.word:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--muted);
+    text-underline-offset: 0.18em;
+}
+
+.word.is-selected {
+    background: var(--surface);
+    text-decoration: underline;
+    text-decoration-thickness: 0.12em;
+    text-underline-offset: 0.18em;
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+}
+
+/* Word panel: bottom sheet on small screens, side column on wide screens. */
+
+.word-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 1rem var(--gutter) 1.5rem;
+    background: var(--surface);
+    border-top: 1px solid var(--rule);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
+    z-index: 20;
+}
+
+.word-panel[hidden] {
+    display: none;
+}
+
+.word-group {
+    white-space: nowrap;
+}
+
+/* Translation words that lead to the original: a light dashed underline, stronger on hover. */
+.pt-word {
+    cursor: pointer;
+    text-decoration: underline dashed;
+    text-decoration-color: var(--rule);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+}
+
+.pt-word:hover {
+    text-decoration-color: var(--link);
+}
+
+.pt-word.is-selected {
+    background: var(--surface);
+    text-decoration: underline;
+    text-decoration-color: var(--link);
+    text-decoration-thickness: 0.12em;
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+    border-radius: 2px;
+}
+
+/* The verse number button keeps the look of the verse number. */
+button.verse-link {
+    color: var(--link);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline dashed;
+    text-underline-offset: 0.2em;
+}
+
+button.verse-link.is-selected {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+
+.verse.is-target {
+    background: var(--surface);
+    outline: 2px solid var(--focus);
+    outline-offset: 0.35em;
+    border-radius: 2px;
+}
+
+@media (min-width: 75rem) {
+    /* The page makes room for the panel instead of being covered by it. */
+    body.has-word-panel {
+        padding-right: 22rem;
+    }
+
+    .word-panel {
+        left: auto;
+        top: 0;
+        width: 22rem;
+        max-height: none;
+        border-top: 0;
+        border-left: 1px solid var(--rule);
+        box-shadow: none;
+    }
+}
+
+.word-panel__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.word-panel__title {
+    font-family: "Gentium Book Plus", var(--font-reading);
+    font-size: 1.6rem;
+    margin: 0;
+}
+
+.word-panel__surface {
+    font-size: 1.4rem;
+    margin: 0.5rem 0 0;
+}
+
+.word-panel__ref {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.word-panel__list {
+    margin: 0 0 1rem;
+}
+
+.word-panel__list dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.word-panel__list dd {
+    margin: 0 0 0.6rem;
+}
+
+.word-panel__counts {
+    padding-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-top: 1px solid var(--rule);
+}
+
+.word-panel__counts h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem;
+}
+
+.word-panel__counts p {
+    margin: 0 0 0.25rem;
+}
+
+.word-panel__note {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.link-button {
+    font: inherit;
+    color: var(--link);
+    background: none;
+    border: 0;
+    padding: 0.25rem 0;
+    text-decoration: underline;
+    text-underline-offset: 0.14em;
+    cursor: pointer;
+}
+
+.action-button {
+    font: inherit;
+    font-weight: 600;
+    min-height: 2.5rem;
+    padding: 0.4rem 1rem;
+    color: var(--bg);
+    background: var(--link);
+    border: 2px solid var(--link);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.action-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* Home edition selector */
+
+.edition-switch {
+    margin-bottom: 1rem;
+}
+
+.word-panel__verse {
+    font-size: 1.3rem;
+    line-height: 1.8;
+    text-align: start;
+    margin: 0.5rem 0;
+}
+
+/* Concordance */
+
+.scope__list,
+.totals {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 1.25rem;
+    margin: 0;
+}
+
+.scope__list dt,
+.totals dt {
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.scope__list dd,
+.totals dd {
+    margin: 0;
+}
+
+.totals dd {
+    font-variant-numeric: tabular-nums;
+    font-size: 1.15rem;
+}
+
+.filters__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.filters__grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.filters__grid select {
+    font: inherit;
+    min-height: 2.25rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: 2px;
+}
+
+.filters__actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+}
+
+.data-table .num {
+    text-align: right;
+}
+
+.hits {
+    list-style: none;
+    padding: 0;
+}
+
+.hits__book h3 {
+    font-family: var(--font-reading);
+    font-size: 1.3rem;
+    margin: 2rem 0 0.5rem;
+}
+
+.hit {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.hit__ref {
+    font-weight: 600;
+}
+
+.hit__original {
+    text-align: start;
+    font-size: 1.2rem;
+    line-height: 1.55;
+    margin: 0.25rem 0;
+}
+
+.hit__original mark {
+    color: inherit;
+    background: none;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 0.12em;
+    text-underline-offset: 0.18em;
+}
+
+.hit__translation {
+    font-family: var(--font-reading);
+    color: var(--muted);
+    margin: 0;
+}
+
+#load-more {
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 48rem) {
+    :root {
+        --article-font-size: 1.125rem;
+        --gutter: 1rem;
+    }
+
+    [data-reading-size="small"] {
+        --article-font-size: 1rem;
+    }
+
+    [data-reading-size="large"] {
+        --article-font-size: 1.3rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+@media print {
+    :root {
+        --bg: #fff;
+        --text: #111;
+    }
+
+    .site-header,
+    .skip-link,
+    .chapter-nav {
+        display: none !important;
+    }
+
+    .article {
+        width: 100%;
+        max-width: none;
+    }
+
+    a {
+        color: inherit;
+    }
+}
+
+/* Aligned translation words: same light dashed underline as the verse level links. */
+.word.pt-aligned {
+    text-decoration: underline dashed;
+    text-decoration-color: var(--rule);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+}
+
+.word.pt-aligned:hover {
+    text-decoration-color: var(--link);
+}
+
+.word-panel__alignment {
+    margin: 0.75rem 0 0.25rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+/* Hebrew and Aramaic: Noto Serif Hebrew covers vowel points and cantillation marks. */
+:lang(hbo),
+:lang(arc) {
+    font-family: "Noto Serif Hebrew", var(--font-reading);
+}
+
+[dir="rtl"].article__body {
+    font-size: calc(var(--article-font-size) * 1.15);
+    line-height: 1.9;
+}
+
+.word-panel__segment {
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+    border-top: 1px solid var(--rule);
+}
+
+.word-panel__segment-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+}
+
+/* Concordance link map: a figure wider than the reading column (design.md 7.6). */
+
+.links__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    align-items: flex-end;
+}
+
+.links__modes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    width: 100%;
+}
+
+.links__modes legend {
+    float: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+}
+
+.links__modes label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2rem;
+}
+
+.links__axis {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.links__axis select {
+    font: inherit;
+    min-height: 2.25rem;
+    max-width: 18rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: 2px;
+}
+
+.links__summary {
+    font-size: 0.9rem;
+}
+
+.links__wide {
+    width: min(calc(100vw - 2 * var(--gutter)), 80rem);
+    margin-left: 50%;
+    transform: translateX(-50%);
+}
+
+.links__canvas {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+}
+
+.links__zoom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.links__help {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0.4rem 0;
+}
+
+.links-stage {
+    position: relative;
+}
+
+.links-lines-canvas,
+.links-stage .links-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.links-click-area {
+    fill: transparent;
+}
+
+.links-click-area.is-over-line {
+    cursor: pointer;
+}
+
+.links-chapter-hit {
+    fill: transparent;
+    cursor: zoom-in;
+}
+
+.links-tooltip {
+    position: absolute;
+    z-index: 2;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.links-zoom-area {
+    fill: transparent;
+    cursor: grab;
+}
+
+.links-zoom-area:active {
+    cursor: grabbing;
+}
+
+.links-line.is-selected {
+    stroke-opacity: 1;
+    stroke-width: 2.5px;
+}
+
+.links-line.is-dimmed {
+    stroke-opacity: 0.03;
+}
+
+.links-point {
+    fill: var(--link);
+    cursor: pointer;
+}
+
+.links-point.is-selected {
+    fill: var(--bg);
+    stroke: var(--link);
+    stroke-width: 3px;
+}
+
+.links-label--book {
+    font-weight: 600;
+}
+
+.links-labels {
+    pointer-events: none;
+}
+
+.links-card-connector {
+    stroke: var(--rule);
+}
+
+.links-card {
+    height: 58px;
+    overflow: hidden;
+    padding: 0.2rem 0.4rem;
+    font-family: var(--font-reading);
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+}
+
+.links-card strong {
+    font-family: var(--font-ui);
+}
+
+.links__detail {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--surface);
+}
+
+.links__detail-title {
+    font-family: var(--font-reading);
+    font-size: 1.25rem;
+    margin: 0 0 0.75rem;
+}
+
+.links__detail-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1rem 2rem;
+}
+
+.links__detail-verse h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.4rem;
+}
+
+.links__detail-translation {
+    font-family: var(--font-reading);
+    font-size: 1.05rem;
+    margin: 0 0 0.4rem;
+}
+
+.links__detail-original {
+    font-size: 1.15rem;
+    color: var(--muted);
+    margin: 0 0 0.4rem;
+}
+
+.links__detail-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.links-svg {
+    display: block;
+    font-family: var(--font-ui);
+}
+
+.links-line {
+    fill: none;
+    stroke: var(--link);
+    cursor: pointer;
+}
+
+.links-line:hover {
+    stroke-opacity: 1;
+    stroke-width: 2.5px;
+}
+
+.links-chapter {
+    fill: var(--muted);
+}
+
+.links-chapter--alt {
+    fill: var(--rule);
+}
+
+.links-label {
+    fill: var(--text);
+    font-size: 11px;
+}
+
+.links-axis-title {
+    fill: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.links-origin {
+    fill: var(--bg);
+    stroke: var(--link);
+    stroke-width: 3px;
+}
+
+/* Interlinear verse in the word panel: original word over its English gloss. */
+.interlinear {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    margin: 0.75rem 0;
+}
+
+.interlinear__cell {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.interlinear__cell .word {
+    font-size: 1.35rem;
+    line-height: 1.4;
+}
+
+.interlinear__gloss {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    line-height: 1.2;
+    color: var(--muted);
+    max-width: 7rem;
+}
+
+/* Header search and search results */
+
+.site-search {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1 1 18rem;
+    max-width: 30rem;
+}
+
+.site-search input {
+    flex: 1;
+    min-width: 0;
+    min-height: 2.25rem;
+    padding: 0 0.6rem;
+    font: inherit;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: 2px;
+}
+
+.site-search .action-button {
+    min-height: 2.25rem;
+    padding: 0.2rem 0.9rem;
+}
+
+.search-caption {
+    caption-side: top;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text);
+    padding: 1.25rem 0 0.4rem;
+}
+
+.search-lemma {
+    font-size: 1.2rem;
+}
+
+.search-language {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.search-strength--forte {
+    font-weight: 600;
+}
+
+.search-strength--fraca {
+    color: var(--muted);
+}
+
+.search-empty {
+    color: var(--muted);
+}
+
+.hit__parallel-ref {
+    font-family: var(--font-ui);
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.hit__translation mark {
+    color: inherit;
+    background: none;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 0.12em;
+}
+
+/* Verse texts of the link map (cards beside the axes, detail and reading list). */
+
+.links-verse__ref {
+    font-family: var(--font-ui);
+    font-weight: 600;
+}
+
+.links-verse__pt {
+    font-family: var(--font-reading);
+}
+
+.links-verse__original {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--muted);
+}
+
+.links-verse--compact {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+}
+
+.links-card .links-verse--compact {
+    -webkit-line-clamp: 5;
+}
+
+.links__reading {
+    margin-top: 1.5rem;
+}
+
+.links-reading-group {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.links-reading-group__anchor {
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+
+.links-reading-group__linked {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0 0 0 1.25rem;
+    border-left: 2px solid var(--rule);
+}
+
+.links-reading-group__linked li {
+    padding: 0.3rem 0;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.links-reading-group__linked li:hover,
+.links-reading-group__anchor:hover {
+    background: var(--surface);
+}

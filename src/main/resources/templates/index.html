@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Bíblia Interlinear')}"></head>
+<body th:attr="data-edition=${edition}">
+<th:block th:replace="~{fragments/layout :: header}"></th:block>
+
+<main id="content" class="article" tabindex="-1">
+    <p class="article__category" id="edition-name"></p>
+    <h1 class="article__title">Livros</h1>
+    <p class="article__dek">Escolha um livro e um capítulo para começar a leitura.</p>
+    <label class="chapter-select edition-switch">
+        <span>Edição</span>
+        <select id="edition-select"></select>
+    </label>
+
+    <p id="load-error" class="error-message" role="alert" hidden></p>
+
+    <section aria-labelledby="ot-title">
+        <h2 id="ot-title" class="section-title">Antigo Testamento</h2>
+        <ul id="books-ot" class="book-list"></ul>
+    </section>
+    <section aria-labelledby="nt-title">
+        <h2 id="nt-title" class="section-title">Novo Testamento</h2>
+        <ul id="books-nt" class="book-list"></ul>
+    </section>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+<script th:src="@{/js/index.js}"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Leitura - Bíblia Interlinear')}"></head>
+<body th:attr="data-edition=${edition},data-book=${book},data-chapter=${chapter}">
+<th:block th:replace="~{fragments/layout :: header}"></th:block>
+
+<main id="content" class="article" tabindex="-1">
+    <p class="article__category" id="edition-name"></p>
+    <h1 class="article__title" id="chapter-title">Carregando...</h1>
+
+    <nav class="chapter-nav" aria-label="Capítulos">
+        <a id="prev-chapter" hidden>Capítulo anterior</a>
+        <label class="chapter-select">
+            <span>Capítulo</span>
+            <select id="chapter-select"></select>
+        </label>
+        <a id="next-chapter" hidden>Próximo capítulo</a>
+        <label class="chapter-select">
+            <span>Edição</span>
+            <select id="edition-select"></select>
+        </label>
+    </nav>
+
+    <p id="original-hint" class="article__caption" hidden></p>
+
+    <p id="word-hint" class="article__caption" hidden>
+        Selecione uma palavra do texto original para ver lema, morfologia e ocorrências.
+    </p>
+
+    <p id="load-error" class="error-message" role="alert" hidden></p>
+
+    <div class="article__body" id="chapter-text"></div>
+
+    <section id="notes-section" class="notes" aria-labelledby="notes-title" hidden>
+        <h2 id="notes-title" class="section-title">Notas e referências</h2>
+        <ol id="notes-list"></ol>
+    </section>
+
+    <p id="added-legend" class="article__caption" hidden>
+        Palavras em itálico foram acrescentadas pelos tradutores para dar sentido à frase em português.
+    </p>
+</main>
+
+<aside id="word-panel" class="word-panel" aria-labelledby="word-panel-title" hidden>
+    <div class="word-panel__header">
+        <h2 id="word-panel-title" class="word-panel__title">Palavra</h2>
+        <button type="button" id="word-panel-close" class="link-button">Fechar</button>
+    </div>
+    <div id="word-panel-body" aria-live="polite"></div>
+</aside>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+<script th:src="@{/js/read.js}"></script>
+</body>
+</html>
