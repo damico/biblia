@@ -68,9 +68,11 @@ def pieces(pipeline, text):
 
 
 def title_phonemes(pipeline, chapter):
-    """ "João. Capítulo 1." with the last vowel of "capítulo" kept apart: espeak-ng joins it to a number that
-    starts with a vowel ("capitulw um"), which sounds like "capítulo onze"."""
-    phonemes, _ = pipeline.g2p('%s. Capítulo %d.' % (chapter['book']['name'], chapter['chapter']))
+    """ "João. Capítulo 2." with the last vowel of "capítulo" kept apart: espeak-ng joins it to a number that
+    starts with a vowel ("capitulw oito"). Chapter 1 is "primeiro": the voice says a lone "um" so that it
+    sounds like "onze"."""
+    number = 'primeiro' if chapter['chapter'] == 1 else str(chapter['chapter'])
+    phonemes, _ = pipeline.g2p('%s. Capítulo %s.' % (chapter['book']['name'], number))
     return GLIDE_BEFORE_WORD.sub('\u028A', phonemes)
 
 

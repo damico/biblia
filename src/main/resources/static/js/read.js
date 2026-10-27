@@ -874,6 +874,7 @@
     var listenStatus = document.getElementById('listen-status');
     var listenPause = document.getElementById('listen-pause');
     var recording = null;
+    var recordingVersion = '';
     var listenAudio = null;
     var listenVerse = null;
 
@@ -882,9 +883,11 @@
             + chapterNumber + '.' + extension;
     }
 
-    // The button shows only when the chapter was recorded.
+    // The button shows only when the chapter was recorded. The audio URL carries the date of the timings, which
+    // are written with it, so a copy of an older recording kept by the browser is never played.
     function findRecording() {
-        fetch(recordingUrl('json')).then(function (response) {
+        fetch(recordingUrl('json'), { cache: 'no-cache' }).then(function (response) {
+            recordingVersion = Date.parse(response.headers.get('Last-Modified')) || '';
             return response.ok ? response.json() : null;
         }).then(function (timings) {
             recording = timings;
@@ -933,7 +936,7 @@
             stopSharing();
         }
         if (!listenAudio) {
-            listenAudio = new Audio(recordingUrl('m4a'));
+            listenAudio = new Audio(recordingUrl('m4a') + '?v=' + recordingVersion);
             listenAudio.preload = 'auto';
             listenAudio.addEventListener('timeupdate', function () {
                 var v = verseAt(listenAudio.currentTime);

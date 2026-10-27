@@ -7,9 +7,11 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
 
-/** Serves the recorded chapters (/audio/<edition>/<book>/<chapter>.m4a and .json) from a folder outside the jar. */
+/**
+ * Serves the recorded chapters (/audio/<edition>/<book>/<chapter>.m4a and .json) from a folder outside the jar.
+ * Browsers revalidate every time (a cheap 304), since a regenerated chapter keeps its path.
+ */
 @Configuration
 public class AudioConfig implements WebMvcConfigurer {
 
@@ -23,6 +25,6 @@ public class AudioConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/audio/**")
                 .addResourceLocations(location.endsWith("/") ? location : location + "/")
-                .setCacheControl(CacheControl.maxAge(1, TimeUnit.DAYS).cachePublic());
+                .setCacheControl(CacheControl.noCache().cachePublic());
     }
 }
