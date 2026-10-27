@@ -7,7 +7,10 @@
 <main id="content" class="article" tabindex="-1">
     <div class="article__meta">
         <p class="article__category" id="edition-name"></p>
-        <button type="button" id="share-start" class="secondary-button" hidden>Compartilhar</button>
+        <div class="article__actions">
+            <button type="button" id="listen-start" class="secondary-button" hidden>Ouvir</button>
+            <button type="button" id="share-start" class="secondary-button" hidden>Compartilhar</button>
+        </div>
     </div>
     <h1 class="article__title" id="chapter-title">Carregando...</h1>
 
@@ -58,6 +61,15 @@
         <button type="button" id="share-create" class="action-button" disabled>Gerar imagem</button>
         <button type="button" id="share-cancel" class="link-button">Cancelar</button>
     </div>
+</div>
+
+<div id="listen-bar" class="share-bar" role="region" aria-label="Ouvir o capítulo" hidden>
+    <p id="listen-status" class="share-bar__status" aria-live="polite"></p>
+    <div class="share-bar__actions">
+        <button type="button" id="listen-pause" class="action-button">Pausar</button>
+        <button type="button" id="listen-stop" class="link-button">Parar</button>
+    </div>
+    <p class="listen-bar__note">Voz, gerada por IA a partir do texto. A pronúncia pode conter erros.</p>
 </div>
 
 <dialog id="share-dialog" class="share-dialog" aria-labelledby="share-dialog-title">

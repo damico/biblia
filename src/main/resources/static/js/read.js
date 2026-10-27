@@ -628,6 +628,7 @@
         if (!panel.hidden) {
             closePanel();
         }
+        stopListening();
         sharing = true;
         document.body.classList.add('is-sharing');
         document.querySelectorAll('#chapter-text .verse').forEach(function (paragraph) {
@@ -866,6 +867,135 @@
         });
     });
 
+    // Reading aloud: each chapter of the Portuguese editions was recorded beforehand (scripts/generate-audio.sh),
+    // with the start and end of each verse, so the verse being read is marked while the audio plays.
+
+    var listenBar = document.getElementById('listen-bar');
+    var listenStatus = document.getElementById('listen-status');
+    var listenPause = document.getElementById('listen-pause');
+    var recording = null;
+    var listenAudio = null;
+    var listenVerse = null;
+
+    function recordingUrl(extension) {
+        return Biblia.url('/audio/') + encodeURIComponent(editionCode) + '/' + encodeURIComponent(bookCode) + '/'
+            + chapterNumber + '.' + extension;
+    }
+
+    // The button shows only when the chapter was recorded.
+    function findRecording() {
+        fetch(recordingUrl('json')).then(function (response) {
+            return response.ok ? response.json() : null;
+        }).then(function (timings) {
+            recording = timings;
+            document.getElementById('listen-start').hidden = !recording;
+        }).catch(function () {
+            // reading aloud is optional
+        });
+    }
+
+    function markSpeaking(verse) {
+        var previous = document.querySelector('#chapter-text .verse.is-speaking');
+        var paragraph = verse ? document.getElementById('v' + verse) : null;
+        if (previous && previous !== paragraph) {
+            previous.classList.remove('is-speaking');
+        }
+        if (!paragraph || paragraph === previous) {
+            return;
+        }
+        paragraph.classList.add('is-speaking');
+        var box = paragraph.getBoundingClientRect();
+        if (box.top < 0 || box.bottom > window.innerHeight - listenBar.offsetHeight) {
+            paragraph.scrollIntoView({block: 'center', behavior: 'smooth'});
+        }
+    }
+
+    function verseAt(time) {
+        var found = null;
+        recording.verses.forEach(function (v) {
+            if (v.start <= time) {
+                found = v;
+            }
+        });
+        return found;
+    }
+
+    function showListenStatus() {
+        var reference = chapterBookName + ' ' + chapterNumber;
+        listenStatus.textContent = listenAudio.paused
+            ? 'Pausado: ' + reference + (listenVerse ? ':' + listenVerse : '')
+            : 'Lendo ' + reference + (listenVerse ? ':' + listenVerse : '');
+        listenPause.textContent = listenAudio.paused ? 'Continuar' : 'Pausar';
+    }
+
+    function startListening() {
+        if (sharing) {
+            stopSharing();
+        }
+        if (!listenAudio) {
+            listenAudio = new Audio(recordingUrl('m4a'));
+            listenAudio.preload = 'auto';
+            listenAudio.addEventListener('timeupdate', function () {
+                var v = verseAt(listenAudio.currentTime);
+                var verse = v ? v.verse : null;
+                if (verse !== listenVerse) {
+                    listenVerse = verse;
+                    markSpeaking(verse);
+                    showListenStatus();
+                }
+            });
+            listenAudio.addEventListener('play', showListenStatus);
+            listenAudio.addEventListener('pause', showListenStatus);
+            listenAudio.addEventListener('ended', function () {
+                listenVerse = null;
+                markSpeaking(null);
+                listenStatus.textContent = 'Fim do capítulo.';
+                listenPause.textContent = 'Ouvir de novo';
+            });
+            listenAudio.addEventListener('error', function () {
+                listenStatus.textContent = 'Não foi possível carregar o áudio do capítulo.';
+            });
+        }
+        // A verse the reader arrived at (#v16) is where the reading starts.
+        var target = document.querySelector('#chapter-text .verse.is-target');
+        var start = target ? recording.verses.filter(function (v) { return 'v' + v.verse === target.id; })[0] : null;
+        listenAudio.currentTime = start ? start.start : 0;
+        listenStatus.textContent = 'Carregando o áudio...';
+        listenBar.hidden = false;
+        document.body.classList.add('is-listening');
+        listenAudio.play().catch(function () {
+            listenStatus.textContent = 'O navegador não permitiu tocar o áudio.';
+        });
+    }
+
+    function stopListening() {
+        if (!listenAudio || listenBar.hidden) {
+            return;
+        }
+        listenAudio.pause();
+        listenVerse = null;
+        markSpeaking(null);
+        listenBar.hidden = true;
+        document.body.classList.remove('is-listening');
+        document.getElementById('listen-start').focus();
+    }
+
+    document.getElementById('listen-start').addEventListener('click', function () {
+        if (!listenBar.hidden) {
+            stopListening();
+        } else {
+            startListening();
+        }
+    });
+    document.getElementById('listen-stop').addEventListener('click', stopListening);
+    listenPause.addEventListener('click', function () {
+        if (listenAudio.paused) {
+            listenAudio.play();
+        } else {
+            listenAudio.pause();
+        }
+    });
+
     function renderChapter(chapter) {
         var title = chapter.book.name + ' ' + chapter.chapter;
         document.getElementById('chapter-title').textContent = title;
@@ -902,6 +1032,7 @@
         document.getElementById('added-legend').hidden = !hasAdded;
         document.getElementById('word-hint').hidden = !hasTokens;
         document.getElementById('share-start').hidden = chapter.passages.length === 0;
+        findRecording();
         if (isTranslation && hasAlignment) {
             var firstAligned = document.querySelector('#chapter-text .pt-aligned');
             Biblia.getJson('/api/tokens/' + firstAligned.dataset.tokenId).then(function (detail) {

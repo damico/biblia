@@ -4,7 +4,7 @@
 <body th:attr="data-edition=${edition}">
 <th:block th:replace="~{fragments/layout :: header}"></th:block>
 
-<main id="content" class="article" tabindex="-1">
+<main id="content" class="article article--books" tabindex="-1">
     <p class="article__category" id="edition-name"></p>
     <h1 class="article__title">Livros</h1>
     <p class="article__dek">Escolha um livro e um capítulo para começar a leitura.</p>
@@ -15,14 +15,16 @@
 
     <p id="load-error" class="error-message" role="alert" hidden></p>
 
-    <section aria-labelledby="ot-title">
-        <h2 id="ot-title" class="section-title">Antigo Testamento</h2>
-        <ul id="books-ot" class="book-list"></ul>
-    </section>
-    <section aria-labelledby="nt-title">
-        <h2 id="nt-title" class="section-title">Novo Testamento</h2>
-        <ul id="books-nt" class="book-list"></ul>
-    </section>
+    <div class="testaments">
+        <section aria-labelledby="ot-title">
+            <h2 id="ot-title" class="section-title">Antigo Testamento</h2>
+            <ul id="books-ot" class="book-list"></ul>
+        </section>
+        <section aria-labelledby="nt-title">
+            <h2 id="nt-title" class="section-title">Novo Testamento</h2>
+            <ul id="books-nt" class="book-list"></ul>
+        </section>
+    </div>
 </main>
 
 <th:block th:replace="~{fragments/layout :: footer}"></th:block>

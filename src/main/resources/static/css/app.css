@@ -318,7 +318,20 @@ a:hover {
     font-weight: 600;
 }
 
-/* Book list */
+/* Book list: on wide screens the two testaments sit side by side, each book opening in its own column. */
+
+.article--books {
+    width: min(calc(100% - 2 * var(--gutter)), 64rem);
+}
+
+@media (min-width: 48rem) {
+    .testaments {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 3rem;
+        align-items: start;
+    }
+}
 
 .book-list {
     list-style: none;
@@ -373,9 +386,13 @@ a:hover {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    max-width: 100%;
 }
 
+/* Long edition names shrink the select instead of widening the page on phones. */
 .chapter-select select {
+    min-width: 0;
+    max-width: 100%;
     font: inherit;
     min-height: 2.25rem;
     padding: 0 0.5rem;
@@ -1453,4 +1470,36 @@ body.is-sharing .verse .verse-link {
     font-family: var(--font-ui);
     font-size: 0.9em;
     color: var(--muted);
+}
+
+/* Reading aloud: the verse being read is marked; the player bar shares the look of the share bar. */
+
+.article__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+body.is-listening {
+    padding-bottom: 9rem;
+}
+
+.verse.is-speaking {
+    background: var(--surface);
+    box-shadow: -0.5rem 0 0 var(--surface), 0.5rem 0 0 var(--surface), -0.75rem 0 0 var(--link);
+    border-radius: 2px;
+}
+
+.listen-bar__note {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+@media print {
+    #listen-bar,
+    #listen-start {
+        display: none !important;
+    }
 }
