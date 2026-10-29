@@ -142,7 +142,8 @@ a:hover {
     gap: 1.25rem;
 }
 
-.pref-toggle {
+.pref-toggle,
+.install-toggle {
     font: inherit;
     color: var(--link);
     background: none;
@@ -151,6 +152,14 @@ a:hover {
     text-decoration: underline;
     text-underline-offset: 0.14em;
     cursor: pointer;
+}
+
+.install-hint {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0.25rem var(--gutter) 0.75rem;
+    font-size: 0.95rem;
+    color: var(--muted);
 }
 
 .reading-prefs {
@@ -1188,6 +1197,33 @@ button.verse-link.is-selected {
 .interlinear__cell .word {
     font-size: 1.35rem;
     line-height: 1.4;
+}
+
+/* Original words in the panel look like links, so it is clear they can be chosen. */
+.word-panel .word {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-color: var(--link);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+}
+
+.word-panel .word:hover {
+    text-decoration-thickness: 0.12em;
+}
+
+/* The book name in the chapter title leads to the other chapters of the book. */
+.article__title a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--link);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+}
+
+.article__title a:hover {
+    color: var(--link);
+    text-decoration-thickness: 0.08em;
 }
 
 .interlinear__gloss {

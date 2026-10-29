@@ -12,6 +12,7 @@
         books.forEach(function (book) {
             var item = Biblia.element('li');
             var details = Biblia.element('details');
+            details.id = 'book-' + book.code;
             details.appendChild(Biblia.element('summary', null, book.name));
 
             var chapters = Biblia.element('ol', 'chapter-links');
@@ -31,6 +32,12 @@
         Object.keys(lists).forEach(function (testament) {
             lists[testament].closest('section').hidden = lists[testament].children.length === 0;
         });
+        // Coming from the book name of a chapter: that book is open, with its chapters in view.
+        var target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+        if (target && target.tagName === 'DETAILS') {
+            target.open = true;
+            target.scrollIntoView({block: 'start'});
+        }
     }
 
     function renderEditions(editions) {

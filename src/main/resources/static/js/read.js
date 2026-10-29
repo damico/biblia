@@ -1001,7 +1001,15 @@
 
     function renderChapter(chapter) {
         var title = chapter.book.name + ' ' + chapter.chapter;
-        document.getElementById('chapter-title').textContent = title;
+        // The book name leads back to the book list, with the chapters of this book open.
+        var heading = document.getElementById('chapter-title');
+        var bookLink = Biblia.element('a', null, chapter.book.name);
+        bookLink.href = Biblia.url('/?edition=') + encodeURIComponent(editionCode) + '#book-'
+            + encodeURIComponent(bookCode);
+        bookLink.title = 'Outros capítulos de ' + chapter.book.name;
+        heading.textContent = '';
+        heading.appendChild(bookLink);
+        heading.appendChild(document.createTextNode(' ' + chapter.chapter));
         document.title = title + ' - ' + chapter.edition.name;
         Biblia.renderEdition(chapter.edition);
 

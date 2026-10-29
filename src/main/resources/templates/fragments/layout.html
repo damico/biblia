@@ -9,6 +9,10 @@
     <link rel="stylesheet" th:href="@{/vendor/fonts/fonts.css}">
     <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="manifest" th:href="@{/manifest.webmanifest}">
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/icon.svg}">
+    <link rel="apple-touch-icon" th:href="@{/img/apple-touch-icon.png}">
+    <meta name="theme-color" content="#17518a">
 </head>
 <body>
 
@@ -25,11 +29,15 @@
             </form>
             <nav aria-label="Principal" class="site-nav">
                 <a th:href="@{/}">Livros</a>
+                <button type="button" id="install-app" class="install-toggle" hidden>Instalar app</button>
                 <button type="button" class="pref-toggle" aria-expanded="false" aria-controls="reading-prefs">
                     Preferências
                 </button>
             </nav>
         </div>
+        <p id="install-hint" class="install-hint" hidden>
+            Para instalar no iPhone ou iPad, toque em Compartilhar e depois em "Adicionar à Tela de Início".
+        </p>
         <div id="reading-prefs" class="reading-prefs" hidden>
             <fieldset>
                 <legend>Tema</legend>

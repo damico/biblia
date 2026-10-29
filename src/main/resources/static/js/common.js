@@ -253,6 +253,45 @@ var Biblia = (function () {
         return glosses.map(function (g) { return g.replace(/\./g, ' '); }).join(', ');
     }
 
+    // Installable as an app: the service worker sits at the root of the site, and the "Instalar app" button
+    // shows only when the browser offers the installation.
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register(url('/sw.js')).catch(function () {
+            // the site works the same without it
+        });
+    }
+    var installPrompt = null;
+    var installButton = document.getElementById('install-app');
+    window.addEventListener('beforeinstallprompt', function (event) {
+        event.preventDefault();
+        installPrompt = event;
+        installButton.hidden = false;
+    });
+    window.addEventListener('appinstalled', function () {
+        installPrompt = null;
+        installButton.hidden = true;
+    });
+    installButton.addEventListener('click', function () {
+        if (installPrompt) {
+            installPrompt.prompt();
+            installPrompt = null;
+            installButton.hidden = true;
+        } else {
+            var hint = document.getElementById('install-hint');
+            hint.hidden = !hint.hidden;
+            installButton.setAttribute('aria-expanded', String(!hint.hidden));
+        }
+    });
+    // iPhone and iPad never offer the installation to the page (iPadOS reports itself as a Mac with touch):
+    // the button opens a hint on how to add the site to the home screen, unless it is already open as the app.
+    var appleMobile = /iPhone|iPad|iPod/.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (appleMobile && !navigator.standalone && !matchMedia('(display-mode: standalone)').matches) {
+        installButton.setAttribute('aria-controls', 'install-hint');
+        installButton.setAttribute('aria-expanded', 'false');
+        installButton.hidden = false;
+    }
+
     return {
         url: url,
         getJson: getJson,
